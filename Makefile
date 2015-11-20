@@ -2,14 +2,14 @@
 TARGET = $(notdir $(CURDIR))
 
 # The teensy version to use, 30, 31, or LC
-TEENSY = 30
+TEENSY = 31
 
 # Set to 24000000, 48000000, or 96000000 to set CPU core speed
 TEENSY_CORE_SPEED = 48000000
 
 # Some libraries will require this to be defined
 # If you define this, you will break the default main.cpp
-#ARDUINO = 10600
+ARDUINO = 10600
 
 # configurable options
 OPTIONS = -DUSB_SERIAL -DLAYOUT_US_ENGLISH
@@ -58,7 +58,7 @@ CXXFLAGS = -std=gnu++0x -felide-constructors -fno-exceptions -fno-rtti
 CFLAGS =
 
 # linker options
-LDFLAGS = -Os -Wl,--gc-sections -mthumb
+LDFLAGS = -Os -Wl,--gc-sections,--defsym=__rtc_localtime=0 -mthumb
 
 # additional libraries to link
 LIBS = -lm
