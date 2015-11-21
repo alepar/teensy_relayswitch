@@ -10,9 +10,10 @@ Adafruit_SSD1306 display(/*OLED_DC*/ 6, /*OLED_RESET*/ 8, /*OLED_CS*/ 7);
 Button btn1(20), btn2(21);
 
 #include "Selection.h"
+#include "TextControls.h"
 
 extern "C" int main(void) {
-	setTime(0, 0, 0, 19, 11, 2015);
+	setTime(0, 0, 0, 21, 11, 2015);
 
 	pinMode(13, OUTPUT);
 
@@ -26,6 +27,7 @@ extern "C" int main(void) {
 	display.setTextColor(WHITE);
 
 	Selection selection(6);
+	DateTimeTextControl dateTimeCtrl(&display);
 
 	uint64_t lastEvent = millis(), curMillis = lastEvent;
 
@@ -43,35 +45,7 @@ extern "C" int main(void) {
 			lastEvent = curMillis;
 			if (selected >= 0 ) {
 				selection.keep();
-				int _year = year();
-				int _month = month();
-				int _day = day();
-				int _hour = hour();
-				int _minute = minute();
-				int _second = second();
-				switch (selected) {
-					case 0:
-						_year++;
-						break;
-					case 1:
-						_month++;
-						break;
-					case 2:
-						_day++;
-						break;
-					case 3:
-						_hour++;
-						break;
-					case 4:
-						_minute++;
-						break;
-					case 5:
-						_second++;
-						break;
-					default:
-						break;
-				}
-				setTime(_hour, _minute, _second, _day, _month, _year);
+				dateTimeCtrl.adjust(dateTimeCtrl.selectableToElement(selected), 1);
 			}
 		}
 
@@ -79,45 +53,14 @@ extern "C" int main(void) {
 
 		if (curMillis-lastEvent<15000) {
 			display.setCursor(0, 0);
-			display.print(" ");
 
-			if (selected == 0 && !showSelection) {
-				display.print("    ");
-			} else {
-				display.printf("%04u", year());
-			}
-			display.print("/");
-			if (selected == 1 && !showSelection) {
-				display.print("  ");
-			} else {
-				display.printf("%02u", month());
-			}
-			display.print("/");
-			if (selected == 2 && !showSelection) {
-				display.print("  ");
-			} else {
-				display.printf("%02u", day());
+			display.print(" ");
+			/* (selected == 0 && !showSelection) */
+			for(uint8_t i=0; i<dateTimeCtrl.getElementCount(); i++) {
+				dateTimeCtrl.print(i, showSelection || i != dateTimeCtrl.selectableToElement(selected));
 			}
 			display.print(" ");
 
-			if (selected == 3 && !showSelection) {
-				display.print("  ");
-			} else {
-				display.printf("%02u", hour());
-			}
-			display.print(":");
-			if (selected == 4 && !showSelection) {
-				display.print("  ");
-			} else {
-				display.printf("%02u", minute());
-			}
-			display.print(":");
-			if (selected == 5 && !showSelection) {
-				display.print("  ");
-			} else {
-				display.printf("%02u", second());
-			}
-			display.println("\n");
 
 			display.setTextColor(BLACK, WHITE);
 			display.print("1");

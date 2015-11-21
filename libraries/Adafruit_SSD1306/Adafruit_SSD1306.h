@@ -1,3 +1,6 @@
+#ifndef _ADAFRUIT_SSD1306__H_
+#define _ADAFRUIT_SSD1306__H_
+
 /*********************************************************************
 This is a library for our Monochrome OLEDs based on SSD1306 drivers
 
@@ -172,3 +175,5 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
   inline void drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color) __attribute__((always_inline));
 
 };
+
+#endif
