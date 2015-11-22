@@ -26,8 +26,39 @@ extern "C" int main(void) {
 	display.setTextSize(1);
 	display.setTextColor(WHITE);
 
-	Selection selection(6);
-	DateTimeTextControl dateTimeCtrl(&display);
+	StaticTextControl spaceTxt(&display, " ");
+	StaticTextControl dotsLine(&display, "---------------------");
+	StaticTextControl dashTxt(&display, " - ");
+
+    SystemDateTimeTextControl systemDateTime(&display);
+
+	SwitchTextControl relay1Sw(&display, "1");
+	TimeTextControl relay1Start(&display);
+	TimeTextControl relay1End(&display);
+
+	SwitchTextControl relay2Sw(&display, "2");
+	TimeTextControl relay2Start(&display);
+	TimeTextControl relay2End(&display);
+
+	SwitchTextControl relay3Sw(&display, "3");
+	TimeTextControl relay3Start(&display);
+	TimeTextControl relay3End(&display);
+
+	SwitchTextControl relay4Sw(&display, "4");
+	TimeTextControl relay4Start(&display);
+	TimeTextControl relay4End(&display);
+
+	TextControl *arr[] = { 
+		&spaceTxt, &systemDateTime, &spaceTxt,
+		&dotsLine,
+		&relay1Sw, &spaceTxt, &relay1Start, &dashTxt, &relay1End,
+		&relay2Sw, &spaceTxt, &relay2Start, &dashTxt, &relay2End,
+		&relay3Sw, &spaceTxt, &relay3Start, &dashTxt, &relay3End,
+		&relay4Sw, &spaceTxt, &relay4Start, &dashTxt, &relay4End
+	};
+
+	CompositeTextControl ctrls(&display, arr,  sizeof(arr)/sizeof(arr[0]));
+	Selection selection(ctrls.getSelectableCount());
 
 	uint64_t lastEvent = millis(), curMillis = lastEvent;
 
@@ -45,7 +76,7 @@ extern "C" int main(void) {
 			lastEvent = curMillis;
 			if (selected >= 0 ) {
 				selection.keep();
-				dateTimeCtrl.adjust(dateTimeCtrl.selectableToElement(selected), 1);
+				ctrls.adjust(ctrls.selectableToElement(selected), 1);
 			}
 		}
 
@@ -54,33 +85,19 @@ extern "C" int main(void) {
 		if (curMillis-lastEvent<15000) {
 			display.setCursor(0, 0);
 
-			display.print(" ");
-			/* (selected == 0 && !showSelection) */
-			for(uint8_t i=0; i<dateTimeCtrl.getElementCount(); i++) {
-				dateTimeCtrl.print(i, showSelection || i != dateTimeCtrl.selectableToElement(selected));
+			for(uint8_t i=0; i<ctrls.getElementCount(); i++) {
+				ctrls.print(i, showSelection || i != ctrls.selectableToElement(selected));
 			}
-			display.print(" ");
+			
 
-
+/*			
 			display.setTextColor(BLACK, WHITE);
 			display.print("1");
 			display.setTextColor(WHITE);
 			display.print(" 00:00:00 - 12:00:00");
+*/
 
-			display.setTextColor(WHITE);
-			display.print("2");
-			display.setTextColor(WHITE);
-			display.print(" 00:00:00 - 12:00:00");
 
-			display.setTextColor(BLACK, WHITE);
-			display.print("3");
-			display.setTextColor(WHITE);
-			display.print(" 00:00:00 - 12:00:00");
-
-			display.setTextColor(WHITE);
-			display.print("4");
-			display.setTextColor(WHITE);
-			display.print(" 00:00:00 - 12:00:00");
 		}
 		
 		display.display();
