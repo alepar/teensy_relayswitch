@@ -12,6 +12,23 @@ Button btn1(20), btn2(21);
 #include "Selection.h"
 #include "TextControls.h"
 
+bool lessOrEqual(uint8_t lh, uint8_t lm, uint8_t ls, uint8_t rh, uint8_t rm, uint8_t rs) {
+	if (lh < rh) {
+		return 1;
+	} else if (lh > rh) {
+		return 0;
+	} else if (lm < rm) {
+		return 1;
+	} else if (lm > rh) {
+		return 0;
+	} else if (ls > rs) {
+		return 0;
+	} else {
+		return 1;
+	}
+
+}
+
 extern "C" int main(void) {
 	setTime(0, 0, 0, 21, 11, 2015);
 
@@ -32,33 +49,38 @@ extern "C" int main(void) {
 
     SystemDateTimeTextControl systemDateTime(&display);
 
-	SwitchTextControl relay1Sw(&display, "1");
-	TimeTextControl relay1Start(&display);
-	TimeTextControl relay1End(&display);
+    SwitchTextControl relaySwitches[] = {
+    	SwitchTextControl(&display, "1"),
+    	SwitchTextControl(&display, "2"),
+    	SwitchTextControl(&display, "3"),
+    	SwitchTextControl(&display, "4")
+    };
 
-	SwitchTextControl relay2Sw(&display, "2");
-	TimeTextControl relay2Start(&display);
-	TimeTextControl relay2End(&display);
+    TimeTextControl relayStarts[] = {
+		TimeTextControl(&display),
+		TimeTextControl(&display),
+		TimeTextControl(&display),
+		TimeTextControl(&display)
+    };
 
-	SwitchTextControl relay3Sw(&display, "3");
-	TimeTextControl relay3Start(&display);
-	TimeTextControl relay3End(&display);
+    TimeTextControl relayEnds[] = {
+		TimeTextControl(&display),
+		TimeTextControl(&display),
+		TimeTextControl(&display),
+		TimeTextControl(&display)
+    };
 
-	SwitchTextControl relay4Sw(&display, "4");
-	TimeTextControl relay4Start(&display);
-	TimeTextControl relay4End(&display);
-
-	TextControl *arr[] = { 
+	TextControl *controlsArray[] = { 
 		&spaceTxt, &systemDateTime, &spaceTxt,
 		&dotsLine,
-		&relay1Sw, &spaceTxt, &relay1Start, &dashTxt, &relay1End,
-		&relay2Sw, &spaceTxt, &relay2Start, &dashTxt, &relay2End,
-		&relay3Sw, &spaceTxt, &relay3Start, &dashTxt, &relay3End,
-		&relay4Sw, &spaceTxt, &relay4Start, &dashTxt, &relay4End
+		&relaySwitches[0], &spaceTxt, &relayStarts[0], &dashTxt, &relayEnds[0],
+		&relaySwitches[1], &spaceTxt, &relayStarts[1], &dashTxt, &relayEnds[1],
+		&relaySwitches[2], &spaceTxt, &relayStarts[2], &dashTxt, &relayEnds[2],
+		&relaySwitches[3], &spaceTxt, &relayStarts[3], &dashTxt, &relayEnds[3]
 	};
 
-	CompositeTextControl ctrls(&display, arr,  sizeof(arr)/sizeof(arr[0]));
-	Selection selection(ctrls.getSelectableCount());
+	CompositeTextControl screenCtrl(&display, controlsArray,  sizeof(controlsArray)/sizeof(controlsArray[0]));
+	Selection selection(screenCtrl.getSelectableCount());
 
 	uint64_t lastEvent = millis(), curMillis = lastEvent;
 
@@ -74,33 +96,37 @@ extern "C" int main(void) {
 		}
 		if (btn2.hadClick()) {
 			lastEvent = curMillis;
-			if (selected >= 0 ) {
+			if (selected >= 0) {
 				selection.keep();
-				ctrls.adjust(ctrls.selectableToElement(selected), 1);
+				screenCtrl.adjust(screenCtrl.selectableToElement(selected), 1);
 			}
 		}
 
 		display.clearDisplay();
-
-		if (curMillis-lastEvent<15000) {
+		if (curMillis-lastEvent < 15000) {
 			display.setCursor(0, 0);
-
-			for(uint8_t i=0; i<ctrls.getElementCount(); i++) {
-				ctrls.print(i, showSelection || i != ctrls.selectableToElement(selected));
+			for(uint8_t i=0; i<screenCtrl.getElementCount(); i++) {
+				screenCtrl.print(i, showSelection || i != screenCtrl.selectableToElement(selected));
 			}
-			
-
-/*			
-			display.setTextColor(BLACK, WHITE);
-			display.print("1");
-			display.setTextColor(WHITE);
-			display.print(" 00:00:00 - 12:00:00");
-*/
-
-
-		}
-		
+		}		
 		display.display();
+
+		uint8_t _hour = hour();
+		uint8_t _minute = minute();
+		uint8_t _second = second();
+
+		for (uint8_t i=0; i<2; i++) {
+			bool on;
+			if(lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second())) {
+				on = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second) && 
+				     lessOrEqual(_hour, _minute, _second, relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second());
+			} else {
+				on = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second) || 
+				     lessOrEqual(_hour, _minute, _second, relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second());
+			}
+
+			digitalWrite(i+3, on ? HIGH : LOW);
+		}
 	}
 }
 

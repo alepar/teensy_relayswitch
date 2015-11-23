@@ -175,6 +175,18 @@ void TimeTextControl::adjust(uint8_t idx, int16_t adjValue) {
 	}
 }
 
+uint8_t TimeTextControl::hour() {
+	return _hour;
+}
+
+uint8_t TimeTextControl::minute() {
+	return _minute;
+}
+
+uint8_t TimeTextControl::second() {
+	return _second;
+}
+
 // =======================================================
 // ================= StaticTextControl ===================
 // =======================================================

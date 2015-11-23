@@ -45,6 +45,10 @@ public:
 	bool isSelectable(uint8_t idx);
 	void print(uint8_t idx, bool visible);
 	void adjust(uint8_t idx, int16_t adjValue);
+
+	uint8_t hour();
+	uint8_t minute();
+	uint8_t second();
 };
 
 class StaticTextControl : public TextControl {
