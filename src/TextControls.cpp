@@ -266,6 +266,14 @@ void SwitchTextControl::adjust(uint8_t idx, int16_t adjValue) {
 	state = !state;
 }
 
+void SwitchTextControl::set(uint8_t val) {
+	state = val;
+}
+
+uint8_t SwitchTextControl::get() {
+	return state;
+}
+
 // =======================================================
 // =============== CompositeTextControl ==================
 // =======================================================

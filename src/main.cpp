@@ -19,14 +19,13 @@ bool lessOrEqual(uint8_t lh, uint8_t lm, uint8_t ls, uint8_t rh, uint8_t rm, uin
 		return 0;
 	} else if (lm < rm) {
 		return 1;
-	} else if (lm > rh) {
+	} else if (lm > rm) {
 		return 0;
 	} else if (ls > rs) {
 		return 0;
 	} else {
 		return 1;
 	}
-
 }
 
 extern "C" int main(void) {
@@ -84,6 +83,8 @@ extern "C" int main(void) {
 
 	uint64_t lastEvent = millis(), curMillis = lastEvent;
 
+	uint8_t lastStates[4] = {0};
+
 	while(1) {
 		curMillis = millis();
 
@@ -109,24 +110,30 @@ extern "C" int main(void) {
 				screenCtrl.print(i, showSelection || i != screenCtrl.selectableToElement(selected));
 			}
 		}		
-		display.display();
 
 		uint8_t _hour = hour();
 		uint8_t _minute = minute();
 		uint8_t _second = second();
 
 		for (uint8_t i=0; i<2; i++) {
-			bool on;
-			if(lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second())) {
-				on = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second) && 
-				     lessOrEqual(_hour, _minute, _second, relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second());
+			uint8_t se, sc, ce, on;
+			se = !lessOrEqual(relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second(), relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second());
+			sc = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second);
+			ce = lessOrEqual(_hour, _minute, _second, relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second());
+			if(se) {
+				on = sc && ce;
 			} else {
-				on = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second) || 
-				     lessOrEqual(_hour, _minute, _second, relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second());
+				on = sc || ce;
 			}
 
-			digitalWrite(i+3, on ? HIGH : LOW);
+			if(lastStates[i] != on) {
+				relaySwitches[i].set(on);
+			}
+			lastStates[i] = on;
+			digitalWrite(i+3, relaySwitches[i].get() ? HIGH : LOW);
 		}
+
+		display.display();
 	}
 }
 

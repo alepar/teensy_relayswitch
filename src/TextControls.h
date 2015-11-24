@@ -71,7 +71,7 @@ class SwitchTextControl : public TextControl {
 private:
 	const char* text;
 	Adafruit_GFX* gfx;
-	bool state;
+	uint8_t state;
 public:
 	SwitchTextControl(Adafruit_GFX* _gfx, const char* _text);
 
@@ -82,6 +82,9 @@ public:
 	bool isSelectable(uint8_t idx);
 	void print(uint8_t idx, bool visible);
 	void adjust(uint8_t idx, int16_t adjValue);
+
+	void set(uint8_t val);
+	uint8_t get();
 };
 
 class CompositeTextControl : public TextControl {
