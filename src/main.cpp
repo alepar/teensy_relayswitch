@@ -7,10 +7,14 @@
 Adafruit_SSD1306 display(/*OLED_DC*/ 6, /*OLED_RESET*/ 8, /*OLED_CS*/ 7);
 
 #include "Button.h"
-Button btn1(20), btn2(21);
+Button selBtn(20); // selection btn
+Button incBtn(21); // inc btn
+Button decBtn(22); // dec btn
 
 #include "Selection.h"
 #include "TextControls.h"
+
+#define FIRST_RELAY_PIN 2
 
 bool lessOrEqual(uint8_t lh, uint8_t lm, uint8_t ls, uint8_t rh, uint8_t rm, uint8_t rs) {
 	if (lh < rh) {
@@ -29,14 +33,17 @@ bool lessOrEqual(uint8_t lh, uint8_t lm, uint8_t ls, uint8_t rh, uint8_t rm, uin
 }
 
 extern "C" int main(void) {
-	setTime(0, 0, 0, 21, 11, 2015);
+	setTime(0, 0, 0, 29, 11, 2015);
 
-	pinMode(13, OUTPUT);
+	// onboard led
+	pinMode(13, OUTPUT); 
+	// relay switches
+	for (uint8_t i=0; i<3; i++) {
+		pinMode(i+FIRST_RELAY_PIN, OUTPUT);
+	}
 
-	pinMode(3, OUTPUT);  //led1
-	pinMode(4, OUTPUT);  //led2
-
-	SPI.setSCK(14);
+	// display setup
+	SPI.setSCK(14);	// change clk to pin 14 from default 13
 	display.begin(SSD1306_SWITCHCAPVCC);
 
 	display.setTextSize(1);
@@ -91,15 +98,22 @@ extern "C" int main(void) {
 		uint8_t showSelection = (curMillis/125) % 2;
 		int8_t selected = selection.selected();
 
-		if (btn1.hadClick()) {
+		if (selBtn.hadClick()) {
 			selection.next();
 			lastEvent = curMillis;
 		}
-		if (btn2.hadClick()) {
+		if (incBtn.hadClick()) {
 			lastEvent = curMillis;
 			if (selected >= 0) {
 				selection.keep();
 				screenCtrl.adjust(screenCtrl.selectableToElement(selected), 1);
+			}
+		}
+		if (decBtn.hadClick()) {
+			lastEvent = curMillis;
+			if (selected >= 0) {
+				selection.keep();
+				screenCtrl.adjust(screenCtrl.selectableToElement(selected), -1);
 			}
 		}
 
@@ -130,7 +144,7 @@ extern "C" int main(void) {
 				relaySwitches[i].set(on);
 			}
 			lastStates[i] = on;
-			digitalWrite(i+3, relaySwitches[i].get() ? HIGH : LOW);
+			digitalWrite(i+FIRST_RELAY_PIN, relaySwitches[i].get() ? HIGH : LOW);
 		}
 
 		display.display();

@@ -75,22 +75,22 @@ void SystemDateTimeTextControl::adjust(uint8_t idx, int16_t adjValue) {
 
 	switch (idx) {
 		case 0:
-			_year++;
+			_year+=adjValue;
 			break;
 		case 2:
-			_month++;
+			_month+=adjValue;
 			break;
 		case 4:
-			_day++;
+			_day+=adjValue;
 			break;
 		case 6:
-			_hour++;
+			_hour+=adjValue;
 			break;
 		case 8:
-			_minute++;
+			_minute+=adjValue;
 			break;
 		case 10:
-			_second++;
+			_second+=adjValue;
 			break;
 		default:
 			break;
@@ -150,28 +150,40 @@ void TimeTextControl::print(uint8_t idx, bool visible) {
 void TimeTextControl::adjust(uint8_t idx, int16_t adjValue) {
 	switch (idx) {
 		case 0:
-			_hour++;
+			_hour+=adjValue;
 			break;
 		case 2:
-			_minute++;
+			_minute+=adjValue;
 			break;
 		case 4:
-			_second++;
+			_second+=adjValue;
 			break;
 	}
 	
-	if (_second == 60) {
-		_second = 0;
-		_minute++;
-	}
-
-	if (_minute == 60) {
-		_minute = 0;
-		_hour++;
-	}
-
-	if (_hour == 24) {
-		_hour = 0;
+	if (adjValue > 0) {
+		if (_second == 60) {
+			_second = 0;
+			_minute++;
+		}
+		if (_minute == 60) {
+			_minute = 0;
+			_hour++;
+		}
+		if (_hour == 24) {
+			_hour = 0;
+		}
+	} else if (adjValue < 0) {
+		if (_second == 255) {
+			_second = 59;
+			_minute--;
+		}
+		if (_minute == 255) {
+			_minute = 59;
+			_hour--;
+		}
+		if (_hour == 255) {
+			_hour = 23;
+		}
 	}
 }
 
