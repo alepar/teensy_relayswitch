@@ -40,7 +40,7 @@ extern "C" int main(void) {
 	// onboard led
 	pinMode(13, OUTPUT); 
 	// relay switches
-	for (uint8_t i=0; i<3; i++) {
+	for (uint8_t i=0; i<4; i++) {
 		pinMode(i+FIRST_RELAY_PIN, OUTPUT);
 	}
 
@@ -131,7 +131,7 @@ extern "C" int main(void) {
 		uint8_t _minute = minute();
 		uint8_t _second = second();
 
-		for (uint8_t i=0; i<2; i++) {
+		for (uint8_t i=0; i<4; i++) {
 			uint8_t se, sc, ce, on;
 			se = !lessOrEqual(relayEnds[i].hour(), relayEnds[i].minute(), relayEnds[i].second(), relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second());
 			sc = lessOrEqual(relayStarts[i].hour(), relayStarts[i].minute(), relayStarts[i].second(), _hour, _minute, _second);
