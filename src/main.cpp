@@ -1,5 +1,7 @@
 #include "WProgram.h"
 
+#include "Snooze.h"
+
 #include "Time.h"
 
 #include "Adafruit_GFX.h"
@@ -148,6 +150,7 @@ extern "C" int main(void) {
 		}
 
 		display.display();
+		Snooze.idle();
 	}
 }
 
